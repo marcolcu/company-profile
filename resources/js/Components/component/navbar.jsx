@@ -43,7 +43,7 @@ export function Navbar() {
                     <SheetContent side="right">
                         <div className="grid gap-4 p-2">
                             <Link
-                                href="#"
+                                href="/"
                                 className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-white ps-2 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50"
                             >
                                 Home
@@ -61,7 +61,7 @@ export function Navbar() {
                                 Services
                             </Link>
                             <Link
-                                href="#"
+                                href="/news"
                                 className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-white ps-2 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50"
                             >
                                 News
@@ -73,7 +73,7 @@ export function Navbar() {
                     <NavigationMenuList>
                         <NavigationMenuLink asChild>
                             <Link
-                                href="#"
+                                href="/"
                                 className="group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors no-underline hover:underline-offset-2 hover:text-gray-900 focus:text-gray-900 focus:outline-none dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50"
                             >
                                 Home

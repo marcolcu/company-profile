@@ -15,7 +15,7 @@ Route::get('/', function () {
 });
 
 Route::get('/news', function() {
-   return Inertia::render('News.News');
+   return Inertia::render('News/News');
 });
 
 Route::get('/dashboard', function () {
