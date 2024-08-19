@@ -104,7 +104,7 @@ const columns = [
     },
 ];
 
-export function DataTableDemo({ data }) {
+export function DataTableServices({ data }) {
     const [sorting, setSorting] = useState([]);
     const [columnFilters, setColumnFilters] = useState([]);
     const [columnVisibility, setColumnVisibility] = useState({});

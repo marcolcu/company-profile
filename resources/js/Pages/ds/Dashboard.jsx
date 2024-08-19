@@ -1,5 +1,15 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { Sidebar, SidebarBody, SidebarLink } from "@/Components/ui/sidebar.jsx";
+import { Head } from "@inertiajs/react";
+import ResponsiveNavLink from "@/Components/ResponsiveNavLink.jsx";
+import axios from "axios";
+import { DataTableServices } from "@/Components/component/datatableServices";
+import { Button } from "@/Components/ui/button";
+import { Input } from "@/Components/ui/input";
+import { Textarea } from "@/Components/ui/textarea";
 import {
     IconArrowLeft,
     IconBrandTabler,
@@ -7,14 +17,6 @@ import {
     IconSettings,
     IconUserBolt,
 } from "@tabler/icons-react";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { Sidebar, SidebarBody, SidebarLink } from "@/Components/ui/sidebar.jsx";
-import { Head, Link } from "@inertiajs/react";
-import ResponsiveNavLink from "@/Components/ResponsiveNavLink.jsx";
-import axios from "axios";
-import { DataTableDemo } from "@/Components/component/datatable";
-import { Button } from "@/Components/ui/button";
 import {
     Drawer,
     DrawerClose,
@@ -25,8 +27,6 @@ import {
     DrawerTitle,
     DrawerTrigger,
 } from "@/Components/ui/drawer";
-import { Input } from "@/Components/ui/input";
-import { Textarea } from "@/Components/ui/textarea";
 
 export default function SidebarDemo() {
     const [open, setOpen] = useState(false);
@@ -211,14 +211,10 @@ const Services = () => {
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
 
-    const drawerRef = useRef(null);
-
     useEffect(() => {
         const fetchServices = async () => {
             try {
                 const response = await axios.get("/api/services");
-
-                console.log(response);
 
                 setServices(response.data);
             } catch (error) {
@@ -259,7 +255,7 @@ const Services = () => {
                 <h1 className="scroll-m-20 text-xl font-bold tracking-tight lg:text-3xl">
                     Services
                 </h1>
-                <Drawer ref={drawerRef}>
+                <Drawer>
                     <DrawerTrigger asChild>
                         <Button variant="default">+ Add Services</Button>
                     </DrawerTrigger>
@@ -309,7 +305,7 @@ const Services = () => {
                     </DrawerContent>
                 </Drawer>
             </div>
-            <DataTableDemo data={services} />
+            <DataTableServices data={services} />
         </>
     );
 };

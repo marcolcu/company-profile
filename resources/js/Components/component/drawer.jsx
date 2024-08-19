@@ -11,7 +11,7 @@ import {
     DrawerTrigger,
 } from "@/components/ui/drawer";
 
-export function DrawerDemo() {
+export function Drawer() {
 
     return (
         <Drawer>
