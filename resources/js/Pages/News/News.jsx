@@ -1,12 +1,15 @@
 "use client";
 import React, {useEffect, useId, useRef, useState} from "react";
 import {AnimatePresence, motion} from "framer-motion";
-import {useOutsideClick} from "@/hooks/useOutsideClick.ts";
+import {useOutsideClick} from "@/hooks/useOutsideClick.jsx";
 import {PlaceholdersAndVanishInput} from "@/Components/ui/placeholders-and-vanish-input.jsx";
 import {Head} from "@inertiajs/react";
+import {Button} from "@/Components/ui/button.jsx";
 
 export default function News() {
     const [value, setValue] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [showAll, setShowAll] = useState(true);
 
     const placeholders = [
         "What's the first rule of Fight Club?",
@@ -22,26 +25,46 @@ export default function News() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        setSearchQuery(value);
+        setShowAll(false);
         console.log(value, "submitted"); // Access value from state
     };
 
+    const handleShowAll = () => {
+        setSearchQuery('');
+        setValue('');
+        setShowAll(true);
+    };
+
+    const filteredCards = showAll
+        ? cards
+        : cards.filter(card =>
+            card.title.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
     return (
         <>
-            <Head title="News" />
+            <Head title="News"/>
             <div className="container mx-auto mt-20">
                 <div className="flex items-center justify-between mb-10">
                     <h1 className="scroll-m-20 text-4xl font-bold tracking-tight lg:text-5xl">
                         News
                     </h1>
-                    <PlaceholdersAndVanishInput placeholders={placeholders} onChange={handleChange} onSubmit={handleSubmit}/>
+                    <div className="search flex items-center justify-end gap-2 w-1/2">
+                        {!showAll && (
+                            <Button onClick={handleShowAll} variant="outline" className="h-12 rounded-full">Show All</Button>
+                        )}
+                        <PlaceholdersAndVanishInput placeholders={placeholders} onChange={handleChange}
+                                                    onSubmit={handleSubmit}/>
+                    </div>
                 </div>
-                <ExpandableCardDemo/>
+                <ExpandableCardDemo cards={filteredCards}/>
             </div>
         </>
     )
 }
 
-export function ExpandableCardDemo() {
+export function ExpandableCardDemo({cards}) {
     const [active, setActive] = useState(null);
     const ref = useRef(null);
     const id = useId();

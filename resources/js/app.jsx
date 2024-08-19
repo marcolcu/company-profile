@@ -17,7 +17,7 @@ createInertiaApp({
 
         root.render(
             <>
-                <Navbar/>
+                {window.location.pathname.startsWith('/admin/') ? null : <Navbar />}
                 <App {...props} />
             </>
         );
