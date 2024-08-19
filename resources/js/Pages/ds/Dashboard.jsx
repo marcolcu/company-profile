@@ -1,16 +1,32 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
     IconArrowLeft,
     IconBrandTabler,
+    IconServer,
     IconSettings,
     IconUserBolt,
 } from "@tabler/icons-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Sidebar, SidebarBody, SidebarLink } from "@/Components/ui/sidebar.jsx";
-import {Head, Link} from "@inertiajs/react";
+import { Head, Link } from "@inertiajs/react";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.jsx";
+import axios from "axios";
+import { DataTableDemo } from "@/Components/component/datatable";
+import { Button } from "@/Components/ui/button";
+import {
+    Drawer,
+    DrawerClose,
+    DrawerContent,
+    DrawerDescription,
+    DrawerFooter,
+    DrawerHeader,
+    DrawerTitle,
+    DrawerTrigger,
+} from "@/Components/ui/drawer";
+import { Input } from "@/Components/ui/input";
+import { Textarea } from "@/Components/ui/textarea";
 
 export default function SidebarDemo() {
     const [open, setOpen] = useState(false);
@@ -23,6 +39,13 @@ export default function SidebarDemo() {
                 <IconBrandTabler className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
             ),
             page: "dashboard",
+        },
+        {
+            label: "Services",
+            icon: (
+                <IconServer className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+            ),
+            page: "services",
         },
         {
             label: "Profile",
@@ -49,9 +72,9 @@ export default function SidebarDemo() {
 
     const handleLinkClick = async (page) => {
         if (page === "logout") {
-            <ResponsiveNavLink method="post" href={route('logout')} as="button">
+            <ResponsiveNavLink method="post" href={route("logout")} as="button">
                 Log Out
-            </ResponsiveNavLink>
+            </ResponsiveNavLink>;
         } else {
             setCurrentPage(page);
             setOpen(false);
@@ -60,7 +83,7 @@ export default function SidebarDemo() {
 
     return (
         <>
-            <Head title="Adminsite"/>
+            <Head title="Adminsite" />
             <div
                 className={cn(
                     "rounded-md flex flex-col md:flex-row bg-gray-100 dark:bg-neutral-800 w-full flex-1 mx-auto border border-neutral-200 dark:border-neutral-700 overflow-hidden",
@@ -70,7 +93,7 @@ export default function SidebarDemo() {
                 <Sidebar open={open} setOpen={setOpen}>
                     <SidebarBody className="justify-between gap-10">
                         <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-                            {open ? <Logo/> : <LogoIcon/>}
+                            {open ? <Logo /> : <LogoIcon />}
                             <div className="mt-8 flex flex-col gap-2">
                                 {links.map((link, idx) => {
                                     if (link.page === "logout") {
@@ -78,13 +101,13 @@ export default function SidebarDemo() {
                                             <ResponsiveNavLink
                                                 key={idx}
                                                 method="post"
-                                                href={route('logout')}
+                                                href={route("logout")}
                                                 as="button"
                                                 className="flex items-center ps-1 cursor-pointer hover:bg-gray-200 dark:hover:bg-neutral-700"
                                             >
                                                 {link.icon}
                                                 <span className="ml-2 text-neutral-700 dark:text-neutral-200">
-                                                  {link.label}
+                                                    {link.label}
                                                 </span>
                                             </ResponsiveNavLink>
                                         );
@@ -93,17 +116,18 @@ export default function SidebarDemo() {
                                             <div
                                                 key={idx}
                                                 className="flex items-center p-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-neutral-700"
-                                                onClick={() => handleLinkClick(link.page)}
+                                                onClick={() =>
+                                                    handleLinkClick(link.page)
+                                                }
                                             >
                                                 {link.icon}
                                                 <span className="ml-2 text-neutral-700 dark:text-neutral-200">
-                                                  {link.label}
+                                                    {link.label}
                                                 </span>
                                             </div>
                                         );
                                     }
                                 })}
-
                             </div>
                         </div>
                         <div>
@@ -124,20 +148,21 @@ export default function SidebarDemo() {
                 </Sidebar>
 
                 <div className="flex flex-1">
-                    <div
-                        className="p-2 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-2 flex-1 w-full h-full">
+                    <div className="p-2 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-2 flex-1 w-full h-full">
                         {(() => {
                             switch (currentPage) {
                                 case "dashboard":
-                                    return <Dashboard/>;
+                                    return <Dashboard />;
+                                case "services":
+                                    return <Services />;
                                 case "profile":
-                                    return <Profile/>;
+                                    return <Profile />;
                                 case "settings":
-                                    return <Settings/>;
+                                    return <Settings />;
                                 case "logout":
-                                    return <Logout/>;
+                                    return <Logout />;
                                 default:
-                                    return <Dashboard/>;
+                                    return <Dashboard />;
                             }
                         })()}
                     </div>
@@ -153,7 +178,7 @@ export const Logo = () => {
             <img
                 src="/image/logocreateit.png"
                 alt="Logo CreateIT"
-                className="h-5 w-auto" // Adjust these values as needed
+                className="h-5 w-auto"
             />
             <motion.span
                 initial={{ opacity: 0 }}
@@ -172,25 +197,125 @@ export const LogoIcon = () => {
             <img
                 src="/image/logocreateit.png"
                 alt="Logo CreateIT"
-                className="h-5 w-auto" // Adjust these values as needed
+                className="h-5 w-auto"
             />
         </div>
     );
 };
 
-// Dummy components for demonstration
-const Dashboard = () => (
-    <div className="flex flex-1">Dashboard Content</div>
-);
+const Dashboard = () => <div className="flex flex-1">Dashboard Content</div>;
 
-const Profile = () => (
-    <div className="flex flex-1">Profile Content</div>
-);
+const Services = () => {
+    const [services, setServices] = useState([]);
 
-const Settings = () => (
-    <div className="flex flex-1">Settings Content</div>
-);
+    const [name, setName] = useState("");
+    const [description, setDescription] = useState("");
 
-const Logout = () => (
-    <div className="flex flex-1">Logout Content</div>
-);
+    const drawerRef = useRef(null);
+
+    useEffect(() => {
+        const fetchServices = async () => {
+            try {
+                const response = await axios.get("/api/services");
+
+                console.log(response);
+
+                setServices(response.data);
+            } catch (error) {
+                console.error("Error fetching services:", error);
+            }
+        };
+
+        fetchServices();
+    }, []);
+
+    const handleSubmitServices = async () => {
+        try {
+            const response = await axios.post("/api/services", {
+                name,
+                description,
+            });
+
+            setName("");
+            setDescription("");
+
+            const updatedServicesResponse = await axios.get("/api/services");
+            setServices(updatedServicesResponse.data);
+
+            const closeDrawerButton = document.getElementById(
+                "closeDrawerServices"
+            );
+            if (closeDrawerButton) {
+                closeDrawerButton.click();
+            }
+        } catch (error) {
+            console.error("Error adding service:", error);
+        }
+    };
+
+    return (
+        <>
+            <div className="flex items-center justify-between">
+                <h1 className="scroll-m-20 text-xl font-bold tracking-tight lg:text-3xl">
+                    Services
+                </h1>
+                <Drawer ref={drawerRef}>
+                    <DrawerTrigger asChild>
+                        <Button variant="default">+ Add Services</Button>
+                    </DrawerTrigger>
+                    <DrawerContent>
+                        <div className="mx-auto w-full max-w-sm">
+                            <DrawerHeader>
+                                <DrawerTitle>Add Services</DrawerTitle>
+                                <DrawerDescription>
+                                    Insert your services in here.
+                                </DrawerDescription>
+                            </DrawerHeader>
+                            <div className="p-4 pb-0">
+                                <div className="flex flex-col gap-3 items-center justify-center">
+                                    <Input
+                                        type="text"
+                                        name="name"
+                                        placeholder="Name"
+                                        value={name}
+                                        onChange={(e) =>
+                                            setName(e.target.value)
+                                        }
+                                    />
+                                    <Textarea
+                                        placeholder="Type your description here."
+                                        name="description"
+                                        value={description}
+                                        onChange={(e) =>
+                                            setDescription(e.target.value)
+                                        }
+                                    />
+                                </div>
+                            </div>
+                            <DrawerFooter>
+                                <Button onClick={handleSubmitServices}>
+                                    Submit
+                                </Button>
+                                <DrawerClose asChild>
+                                    <Button
+                                        variant="outline"
+                                        id="closeDrawerServices"
+                                    >
+                                        Cancel
+                                    </Button>
+                                </DrawerClose>
+                            </DrawerFooter>
+                        </div>
+                    </DrawerContent>
+                </Drawer>
+            </div>
+            <DataTableDemo data={services} />
+        </>
+    );
+};
+
+const Profile = () => <div className="flex flex-1">Profile Content</div>;
+
+const Settings = () => <div className="flex flex-1">Settings Content</div>;
+
+const Logout = () => <div className="flex flex-1">Logout Content</div>;
