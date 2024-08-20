@@ -1,22 +1,49 @@
-import {Head} from '@inertiajs/react';
-import {AuroraBackground} from "@/Components/ui/aurora-background.jsx";
-import {motion} from "framer-motion";
-import {FlipWords} from "@/Components/ui/flip-words.jsx";
-import {HoverEffect} from "@/Components/ui/card-hover-effect.jsx";
-import {CardStack} from "@/Components/ui/card-stack.jsx";
-import {cn} from "@/lib/utils";
-import {LinkPreview} from "@/Components/ui/link-preview.jsx";
+import { Head } from "@inertiajs/react";
+import { AuroraBackground } from "@/Components/ui/aurora-background.jsx";
+import { motion } from "framer-motion";
+import { FlipWords } from "@/Components/ui/flip-words.jsx";
+import { HoverEffect } from "@/Components/ui/card-hover-effect.jsx";
+import { CardStack } from "@/Components/ui/card-stack.jsx";
+import { cn } from "@/lib/utils";
+import { LinkPreview } from "@/Components/ui/link-preview.jsx";
+import { useEffect, useState } from "react";
 
 export default function Welcome() {
     const words = ["IT", " Business", " Website", " Profit"];
 
+    const [services, setServices] = useState([]);
+    const [portfolio, setPortfolio] = useState([]);
+
+    useEffect(() => {
+        const fetchServices = async () => {
+            try {
+                const response = await axios.get("/api/services");
+                setServices(response.data);
+            } catch (error) {
+                console.error("Error fetching services:", error);
+            }
+        };
+
+        const fetchPortfolio = async () => {
+            try {
+                const response = await axios.get("/api/portfolios");
+                setPortfolio(response.data);
+            } catch (error) {
+                console.error("Error fetching portfolios:", error);
+            }
+        };
+
+        fetchPortfolio();
+        fetchServices();
+    }, []);
+
     return (
         <>
-            <Head title="Home"/>
+            <Head title="Home" />
             <AuroraBackground>
                 <motion.div
-                    initial={{opacity: 0.0, y: 40}}
-                    whileInView={{opacity: 1, y: 0}}
+                    initial={{ opacity: 0.0, y: 40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
                     transition={{
                         delay: 0.3,
                         duration: 0.8,
@@ -29,38 +56,46 @@ export default function Welcome() {
                             Software and Technology Solutions
                         </div>
                         <div className="text-3xl md:text-7xl font-bold dark:text-white">
-                            Create<FlipWords words={words}/>
+                            Create
+                            <FlipWords words={words} />
                         </div>
                         <div className="font-extralight text-base md:text-xl dark:text-neutral-200 py-4 w-3/4">
-                            At PT CreateIT Solution Indonesia, we are at the forefront of innovation, delivering
-                            unparalleled software solutions to drive the success of businesses in the digital age. As an
-                            experienced software company, we specialize in creating and maintaining businesses' software
+                            At PT CreateIT Solution Indonesia, we are at the
+                            forefront of innovation, delivering unparalleled
+                            software solutions to drive the success of
+                            businesses in the digital age. As an experienced
+                            software company, we specialize in creating and
+                            maintaining businesses' software
                         </div>
                         <div className="flex gap-2">
-                            <button
-                                className="bg-[#0fc4c0] dark:bg-white rounded-full w-fit text-white dark:text-black px-5 py-3">
+                            <button className="bg-[#0fc4c0] dark:bg-white rounded-full w-fit text-white dark:text-black px-5 py-3">
                                 Read More
                             </button>
                             <LinkPreview
-                                url="https://ui.aceternity.com"
+                                url="http://127.0.0.1:8000/news"
                                 className="font-bold bg-clip-text text-transparent bg-gradient-to-br from-purple-500 to-pink-500"
                             >
-                                <button
-                                    className="bg-transparent border border-black dark:bg-white rounded-full w-fit text-black dark:text-black px-5 py-3">
+                                <button className="bg-transparent border border-black dark:bg-white rounded-full w-fit text-black dark:text-black px-5 py-3">
                                     News
                                 </button>
                             </LinkPreview>
-
                         </div>
                     </div>
-                    <motion.div initial={{opacity: 0.0, y: 40}}
-                                whileInView={{opacity: 1, y: 0}}
-                                transition={{
-                                    delay: 0.5,
-                                    duration: 0.8,
-                                    ease: "easeInOut",
-                                }} className="right">
-                        <img src="/image/logocreateit.png" alt="Logo CreateIT" className="w-[700px]"/>
+                    <motion.div
+                        initial={{ opacity: 0.0, y: 40 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{
+                            delay: 0.5,
+                            duration: 0.8,
+                            ease: "easeInOut",
+                        }}
+                        className="right"
+                    >
+                        <img
+                            src="/image/logocreateit.png"
+                            alt="Logo CreateIT"
+                            className="w-[700px]"
+                        />
                     </motion.div>
                 </motion.div>
             </AuroraBackground>
@@ -77,7 +112,7 @@ export default function Welcome() {
                     Services that we are provide
                 </div>
                 <div className="">
-                    <HoverEffect items={projects}/>
+                    <HoverEffect items={services} />
                 </div>
             </section>
             {/* Portfolio & Partners */}
@@ -92,7 +127,11 @@ export default function Welcome() {
                     Our Portfolio & Partners
                 </div>
                 <div className="">
-                    <CardStack items={CARDS}/>
+                    {portfolio.length > 0 ? (
+                        <CardStack items={portfolio} />
+                    ) : (
+                        null// Optional: Provide feedback if there are no portfolios
+                    )}
                 </div>
             </section>
         </>
@@ -138,16 +177,16 @@ export const projects = [
     },
 ];
 
-const Highlight = ({children, className}) => {
+const Highlight = ({ children, className }) => {
     return (
         <span
             className={cn(
-                'font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-700/[0.2] dark:text-emerald-500 px-1 py-0.5',
+                "font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-700/[0.2] dark:text-emerald-500 px-1 py-0.5",
                 className
             )}
         >
-      {children}
-    </span>
+            {children}
+        </span>
     );
 };
 
@@ -159,8 +198,9 @@ export const CARDS = [
         link: "https://chatgpt.com",
         content: (
             <p>
-                These cards are amazing, <Highlight>I want to use them</Highlight> in my
-                project. Framer motion is a godsend ngl tbh fam 🙏
+                These cards are amazing,{" "}
+                <Highlight>I want to use them</Highlight> in my project. Framer
+                motion is a godsend ngl tbh fam 🙏
             </p>
         ),
     },
@@ -172,9 +212,9 @@ export const CARDS = [
         content: (
             <p>
                 I dont like this Twitter thing,{" "}
-                <Highlight>deleting it right away</Highlight> because yolo. Instead, I
-                would like to call it <Highlight>X.com</Highlight> so that it can easily
-                be confused with adult sites.
+                <Highlight>deleting it right away</Highlight> because yolo.
+                Instead, I would like to call it <Highlight>X.com</Highlight> so
+                that it can easily be confused with adult sites.
             </p>
         ),
     },
@@ -186,10 +226,10 @@ export const CARDS = [
         content: (
             <p>
                 The first rule of
-                <Highlight>Fight Club</Highlight> is that you do not talk about fight
-                club. The second rule of
-                <Highlight>Fight club</Highlight> is that you DO NOT TALK about fight
-                club.
+                <Highlight>Fight Club</Highlight> is that you do not talk about
+                fight club. The second rule of
+                <Highlight>Fight club</Highlight> is that you DO NOT TALK about
+                fight club.
             </p>
         ),
     },
