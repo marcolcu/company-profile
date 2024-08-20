@@ -30,7 +30,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 
-export function DataTableServices({ data, onEdit, onDelete }) {
+export function DataTablePortfolio({ data, onEdit, onDelete }) {
     const [sorting, setSorting] = useState([]);
     const [columnFilters, setColumnFilters] = useState([]);
     const [columnVisibility, setColumnVisibility] = useState({});
@@ -63,11 +63,15 @@ export function DataTableServices({ data, onEdit, onDelete }) {
         },
         {
             accessorKey: "name",
-            header: "Services",
+            header: "Portfolios",
         },
         {
             accessorKey: "description",
             header: "Description",
+        },
+        {
+            accessorKey: "type",
+            header: "Type",
         },
         {
             id: "actions",

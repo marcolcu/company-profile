@@ -16,8 +16,12 @@ class AdminController extends Controller
     /**
      * Display the user's profile form.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Inertia::render('ds/Dashboard');
+        return Inertia::render('ds/Dashboard', [
+            'auth' => [
+                'user' => $request->user(),
+            ],
+        ]);
     }
 }

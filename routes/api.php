@@ -8,3 +8,4 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::apiResource('services', \App\Http\Controllers\Api\ServiceController::class);
+Route::apiResource('portfolios', \App\Http\Controllers\Api\PortfolioController::class);

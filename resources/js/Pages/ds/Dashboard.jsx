@@ -7,12 +7,15 @@ import { Head } from "@inertiajs/react";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.jsx";
 import axios from "axios";
 import { DataTableServices } from "@/Components/component/datatableServices";
+import { Avatar, AvatarFallback } from "@/Components/ui/avatar";
+import { DataTablePortfolio } from "@/Components/component/datatablePortfolio";
 import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import { Textarea } from "@/Components/ui/textarea";
 import {
     IconArrowLeft,
     IconBrandTabler,
+    IconReportSearch,
     IconServer,
     IconSettings,
     IconUserBolt,
@@ -37,7 +40,7 @@ import {
     AlertDialogTitle,
 } from "@/Components/ui/alert-dialog";
 
-export default function SidebarDemo() {
+export default function SidebarDemo({ auth }) {
     const [open, setOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState("dashboard");
 
@@ -55,6 +58,13 @@ export default function SidebarDemo() {
                 <IconServer className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
             ),
             page: "services",
+        },
+        {
+            label: "Portfolios",
+            icon: (
+                <IconReportSearch className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+            ),
+            page: "portfolios",
         },
         {
             label: "Profile",
@@ -89,7 +99,7 @@ export default function SidebarDemo() {
             setOpen(false);
         }
     };
-
+    console.log(auth);
     return (
         <>
             <Head title="Adminsite" />
@@ -142,13 +152,13 @@ export default function SidebarDemo() {
                         <div>
                             <SidebarLink
                                 link={{
-                                    label: "Manu Arora",
+                                    label: auth.user.name,
                                     icon: (
-                                        <img
-                                            src="https://assets.aceternity.com/manu.png"
-                                            className="h-7 w-7 flex-shrink-0 rounded-full"
-                                            alt="Avatar"
-                                        />
+                                        <Avatar>
+                                            <AvatarFallback className="capitalize">
+                                                {auth.user.name.charAt(0)}
+                                            </AvatarFallback>
+                                        </Avatar>
                                     ),
                                 }}
                             />
@@ -164,6 +174,8 @@ export default function SidebarDemo() {
                                     return <Dashboard />;
                                 case "services":
                                     return <Services />;
+                                case "portfolios":
+                                    return <Portfolios />;
                                 case "profile":
                                     return <Profile />;
                                 case "settings":
@@ -350,6 +362,172 @@ const Services = () => {
                 onEdit={handleEditService}
                 onDelete={(id) => {
                     setDeleteServiceId(id);
+                    setDeleteDialogOpen(true);
+                }}
+            />
+            <AlertDialog
+                open={deleteDialogOpen}
+                onOpenChange={setDeleteDialogOpen}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            Are you absolutely sure?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently
+                            delete this service.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeleteService}>
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </>
+    );
+};
+
+const Portfolios = () => {
+    const [portfolio, setPortfolio] = useState([]);
+    const [name, setName] = useState("");
+    const [description, setDescription] = useState("");
+    const [type, setType] = useState("");
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    const [editPortfolioId, setEditPortfolioId] = useState(null);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [deletePortfolioId, setDeletePortfolioId] = useState(null);
+
+    useEffect(() => {
+        const fetchPortfolio = async () => {
+            try {
+                const response = await axios.get("/api/portfolios");
+                setPortfolio(response.data);
+            } catch (error) {
+                console.error("Error fetching portfolios:", error);
+            }
+        };
+
+        fetchPortfolio();
+    }, []);
+
+    const handleEditPortfolio = (id) => {
+        const serviceToEdit = portfolio.find((service) => service.id === id);
+        if (serviceToEdit) {
+            setName(serviceToEdit.name);
+            setDescription(serviceToEdit.description);
+            setEditPortfolioId(id);
+            setDrawerOpen(true); // Open the drawer
+        }
+    };
+
+    const handleSubmitPortfolios = async () => {
+        try {
+            if (editPortfolioId) {
+                // Handle update logic here
+                await axios.put(`/api/portfolios/${editPortfolioId}`, {
+                    name,
+                    description,
+                });
+            } else {
+                // Handle create logic here
+                await axios.post("/api/portfolios", { name, description });
+            }
+
+            // Reset form
+            setName("");
+            setDescription("");
+            setEditPortfolioId(null);
+
+            // Refresh services
+            const updatedServicesResponse = await axios.get("/api/portfolios");
+            setPortfolio(updatedServicesResponse.data);
+
+            setDrawerOpen(false); // Close the drawer
+        } catch (error) {
+            console.error("Error saving service:", error);
+        }
+    };
+
+    const handleDeleteService = async () => {
+        try {
+            await axios.delete(`/api/portfolios/${deletePortfolioId}`);
+            setPortfolio((prevServices) =>
+                prevServices.filter((service) => service.id !== deletePortfolioId)
+            );
+            setDeleteDialogOpen(false);
+        } catch (error) {
+            console.error("Error deleting service:", error);
+        }
+    };
+
+    return (
+        <>
+            <Head title="Adminsite Portfolio" />
+            <div className="flex items-center justify-between">
+                <h1 className="scroll-m-20 text-xl font-bold tracking-tight lg:text-3xl">
+                    Portfolio
+                </h1>
+                <Button onClick={() => setDrawerOpen(true)} variant="default">
+                    + Add Portfolio
+                </Button>
+            </div>
+            <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+                <DrawerContent>
+                    <div className="mx-auto w-full max-w-sm">
+                        <DrawerHeader>
+                            <DrawerTitle>
+                                {editPortfolioId ? "Edit Portfolio" : "Add Portfolio"}
+                            </DrawerTitle>
+                            <DrawerDescription>
+                                {editPortfolioId
+                                    ? "Edit the portfolio details."
+                                    : "Insert your portfolios in here."}
+                            </DrawerDescription>
+                        </DrawerHeader>
+                        <div className="p-4 pb-0">
+                            <div className="flex flex-col gap-3 items-center justify-center">
+                                <Input
+                                    type="text"
+                                    name="name"
+                                    placeholder="Name"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                />
+                                <Textarea
+                                    placeholder="Type your description here."
+                                    name="description"
+                                    value={description}
+                                    onChange={(e) =>
+                                        setDescription(e.target.value)
+                                    }
+                                />
+                            </div>
+                        </div>
+                        <DrawerFooter>
+                            <Button onClick={handleSubmitPortfolios}>
+                                {editPortfolioId ? "Save Changes" : "Submit"}
+                            </Button>
+                            <DrawerClose asChild>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setDrawerOpen(false)}
+                                >
+                                    Cancel
+                                </Button>
+                            </DrawerClose>
+                        </DrawerFooter>
+                    </div>
+                </DrawerContent>
+            </Drawer>
+            <DataTablePortfolio
+                data={portfolio}
+                onEdit={handleEditPortfolio}
+                onDelete={(id) => {
+                    setDeletePortfolioId(id);
                     setDeleteDialogOpen(true);
                 }}
             />
