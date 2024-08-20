@@ -29,6 +29,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { Badge } from "../ui/badge";
 
 export function DataTablePortfolio({ data, onEdit, onDelete }) {
     const [sorting, setSorting] = useState([]);
@@ -66,12 +67,32 @@ export function DataTablePortfolio({ data, onEdit, onDelete }) {
             header: "Portfolios",
         },
         {
+            accessorKey: "link",
+            header: "Link",
+        },
+        {
             accessorKey: "description",
             header: "Description",
         },
         {
             accessorKey: "type",
             header: "Type",
+            cell: ({ row }) => {
+                const data = row.original.type;
+
+                return (
+                    <>
+                        <Badge
+                            variant={
+                                data === "portfolio" ? "outline" : "secondary"
+                            }
+                            className="capitalize"
+                        >
+                            {data}
+                        </Badge>
+                    </>
+                );
+            },
         },
         {
             id: "actions",

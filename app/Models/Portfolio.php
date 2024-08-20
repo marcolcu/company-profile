@@ -12,7 +12,7 @@ class Portfolio extends Model
     protected $table = 'portfolio';
 
     protected $fillable = [
-        'nama',
+        'name',
         'description',
         'link',
         'type',

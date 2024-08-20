@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Portfolio;
-use Illuminate\Support\Facades\Validator;
 
 class PortfolioController extends Controller
 {
@@ -21,6 +20,26 @@ class PortfolioController extends Controller
         }
 
         return response()->json($portfolios, 200);
+    }
+
+    /**
+     * Store a new portfolio.
+    */
+    public function store(Request $request)
+    {
+        // Validasi data yang diterima dari permintaan
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'link' => 'nullable|string|max:255',
+            'type' => 'nullable|string|max:255',
+        ]);
+
+        // Buat instansi Portfolio baru dengan data yang divalidasi
+        $portfolio = Portfolio::create($validatedData);
+
+        // Kembalikan respons dengan status 201 (Created)
+        return response()->json(['message' => 'Portfolio created successfully', 'portfolio' => $portfolio], 201);
     }
 
     /**
@@ -48,20 +67,18 @@ class PortfolioController extends Controller
             return response()->json(['message' => 'Portfolio not found'], 404);
         }
 
-        $validator = Validator::make($request->all(), [
-            'nama' => 'required|string|max:255',
+        // Validasi data yang diterima dari permintaan
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'link' => 'nullable|string|max:255',
             'type' => 'nullable|string|max:255',
-            'updateby' => 'required|integer',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
-        }
+        // Update portfolio dengan data yang divalidasi
+        $portfolio->update($validatedData);
 
-        $portfolio->update($request->all());
-
+        // Kembalikan respons dengan status 200 (OK)
         return response()->json(['message' => 'Portfolio updated successfully', 'portfolio' => $portfolio], 200);
     }
 

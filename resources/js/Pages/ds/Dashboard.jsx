@@ -39,6 +39,15 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/Components/ui/alert-dialog";
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/Components/ui/select";
 
 export default function SidebarDemo({ auth }) {
     const [open, setOpen] = useState(false);
@@ -99,7 +108,7 @@ export default function SidebarDemo({ auth }) {
             setOpen(false);
         }
     };
-    console.log(auth);
+
     return (
         <>
             <Head title="Adminsite" />
@@ -305,7 +314,15 @@ const Services = () => {
                 <h1 className="scroll-m-20 text-xl font-bold tracking-tight lg:text-3xl">
                     Services
                 </h1>
-                <Button onClick={() => setDrawerOpen(true)} variant="default">
+                <Button
+                    onClick={() => {
+                        setDrawerOpen(true);
+                        setEditServiceId(null);
+                        setName("");
+                        setDescription("");
+                    }}
+                    variant="default"
+                >
                     + Add Services
                 </Button>
             </div>
@@ -394,6 +411,7 @@ const Services = () => {
 const Portfolios = () => {
     const [portfolio, setPortfolio] = useState([]);
     const [name, setName] = useState("");
+    const [link, setLink] = useState("");
     const [description, setDescription] = useState("");
     const [type, setType] = useState("");
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -415,10 +433,12 @@ const Portfolios = () => {
     }, []);
 
     const handleEditPortfolio = (id) => {
-        const serviceToEdit = portfolio.find((service) => service.id === id);
-        if (serviceToEdit) {
-            setName(serviceToEdit.name);
-            setDescription(serviceToEdit.description);
+        const portfolioToEdit = portfolio.find((service) => service.id === id);
+        if (portfolioToEdit) {
+            setName(portfolioToEdit.name);
+            setLink(portfolioToEdit.link);
+            setType(portfolioToEdit.type);
+            setDescription(portfolioToEdit.description);
             setEditPortfolioId(id);
             setDrawerOpen(true); // Open the drawer
         }
@@ -430,15 +450,24 @@ const Portfolios = () => {
                 // Handle update logic here
                 await axios.put(`/api/portfolios/${editPortfolioId}`, {
                     name,
+                    link,
+                    type,
                     description,
                 });
             } else {
                 // Handle create logic here
-                await axios.post("/api/portfolios", { name, description });
+                await axios.post("/api/portfolios", {
+                    name,
+                    link,
+                    type,
+                    description,
+                });
             }
 
             // Reset form
             setName("");
+            setLink("");
+            setType("");
             setDescription("");
             setEditPortfolioId(null);
 
@@ -452,16 +481,22 @@ const Portfolios = () => {
         }
     };
 
-    const handleDeleteService = async () => {
+    const handleDeletePortfolio = async () => {
         try {
             await axios.delete(`/api/portfolios/${deletePortfolioId}`);
-            setPortfolio((prevServices) =>
-                prevServices.filter((service) => service.id !== deletePortfolioId)
+            setPortfolio((prevPortfolio) =>
+                prevPortfolio.filter(
+                    (service) => service.id !== deletePortfolioId
+                )
             );
             setDeleteDialogOpen(false);
         } catch (error) {
             console.error("Error deleting service:", error);
         }
+    };
+
+    const handleSelectChange = (val) => {
+        setType(val);
     };
 
     return (
@@ -471,7 +506,17 @@ const Portfolios = () => {
                 <h1 className="scroll-m-20 text-xl font-bold tracking-tight lg:text-3xl">
                     Portfolio
                 </h1>
-                <Button onClick={() => setDrawerOpen(true)} variant="default">
+                <Button
+                    onClick={() => {
+                        setDrawerOpen(true);
+                        setEditPortfolioId(null);
+                        setName("");
+                        setLink("");
+                        setType("");
+                        setDescription("");
+                    }}
+                    variant="default"
+                >
                     + Add Portfolio
                 </Button>
             </div>
@@ -480,7 +525,9 @@ const Portfolios = () => {
                     <div className="mx-auto w-full max-w-sm">
                         <DrawerHeader>
                             <DrawerTitle>
-                                {editPortfolioId ? "Edit Portfolio" : "Add Portfolio"}
+                                {editPortfolioId
+                                    ? "Edit Portfolio"
+                                    : "Add Portfolio"}
                             </DrawerTitle>
                             <DrawerDescription>
                                 {editPortfolioId
@@ -497,6 +544,32 @@ const Portfolios = () => {
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                 />
+                                <Input
+                                    type="text"
+                                    name="link"
+                                    placeholder="Link"
+                                    value={link}
+                                    onChange={(e) => setLink(e.target.value)}
+                                />
+                                <Select
+                                    value={type}
+                                    onValueChange={handleSelectChange}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Types</SelectLabel>
+                                            <SelectItem value="portfolio">
+                                                Portfolio
+                                            </SelectItem>
+                                            <SelectItem value="partners">
+                                                Partners
+                                            </SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
                                 <Textarea
                                     placeholder="Type your description here."
                                     name="description"
@@ -547,7 +620,7 @@ const Portfolios = () => {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDeleteService}>
+                        <AlertDialogAction onClick={handleDeletePortfolio}>
                             Delete
                         </AlertDialogAction>
                     </AlertDialogFooter>
