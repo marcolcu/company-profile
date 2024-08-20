@@ -25,8 +25,17 @@ import {
     DrawerFooter,
     DrawerHeader,
     DrawerTitle,
-    DrawerTrigger,
 } from "@/Components/ui/drawer";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/Components/ui/alert-dialog";
 
 export default function SidebarDemo() {
     const [open, setOpen] = useState(false);
@@ -207,15 +216,17 @@ const Dashboard = () => <div className="flex flex-1">Dashboard Content</div>;
 
 const Services = () => {
     const [services, setServices] = useState([]);
-
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    const [editServiceId, setEditServiceId] = useState(null);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [deleteServiceId, setDeleteServiceId] = useState(null);
 
     useEffect(() => {
         const fetchServices = async () => {
             try {
                 const response = await axios.get("/api/services");
-
                 setServices(response.data);
             } catch (error) {
                 console.error("Error fetching services:", error);
@@ -225,27 +236,53 @@ const Services = () => {
         fetchServices();
     }, []);
 
+    const handleEditService = (id) => {
+        const serviceToEdit = services.find((service) => service.id === id);
+        if (serviceToEdit) {
+            setName(serviceToEdit.name);
+            setDescription(serviceToEdit.description);
+            setEditServiceId(id);
+            setDrawerOpen(true); // Open the drawer
+        }
+    };
+
     const handleSubmitServices = async () => {
         try {
-            const response = await axios.post("/api/services", {
-                name,
-                description,
-            });
+            if (editServiceId) {
+                // Handle update logic here
+                await axios.put(`/api/services/${editServiceId}`, {
+                    name,
+                    description,
+                });
+            } else {
+                // Handle create logic here
+                await axios.post("/api/services", { name, description });
+            }
 
+            // Reset form
             setName("");
             setDescription("");
+            setEditServiceId(null);
 
+            // Refresh services
             const updatedServicesResponse = await axios.get("/api/services");
             setServices(updatedServicesResponse.data);
 
-            const closeDrawerButton = document.getElementById(
-                "closeDrawerServices"
-            );
-            if (closeDrawerButton) {
-                closeDrawerButton.click();
-            }
+            setDrawerOpen(false); // Close the drawer
         } catch (error) {
-            console.error("Error adding service:", error);
+            console.error("Error saving service:", error);
+        }
+    };
+
+    const handleDeleteService = async () => {
+        try {
+            await axios.delete(`/api/services/${deleteServiceId}`);
+            setServices((prevServices) =>
+                prevServices.filter((service) => service.id !== deleteServiceId)
+            );
+            setDeleteDialogOpen(false);
+        } catch (error) {
+            console.error("Error deleting service:", error);
         }
     };
 
@@ -255,57 +292,88 @@ const Services = () => {
                 <h1 className="scroll-m-20 text-xl font-bold tracking-tight lg:text-3xl">
                     Services
                 </h1>
-                <Drawer>
-                    <DrawerTrigger asChild>
-                        <Button variant="default">+ Add Services</Button>
-                    </DrawerTrigger>
-                    <DrawerContent>
-                        <div className="mx-auto w-full max-w-sm">
-                            <DrawerHeader>
-                                <DrawerTitle>Add Services</DrawerTitle>
-                                <DrawerDescription>
-                                    Insert your services in here.
-                                </DrawerDescription>
-                            </DrawerHeader>
-                            <div className="p-4 pb-0">
-                                <div className="flex flex-col gap-3 items-center justify-center">
-                                    <Input
-                                        type="text"
-                                        name="name"
-                                        placeholder="Name"
-                                        value={name}
-                                        onChange={(e) =>
-                                            setName(e.target.value)
-                                        }
-                                    />
-                                    <Textarea
-                                        placeholder="Type your description here."
-                                        name="description"
-                                        value={description}
-                                        onChange={(e) =>
-                                            setDescription(e.target.value)
-                                        }
-                                    />
-                                </div>
-                            </div>
-                            <DrawerFooter>
-                                <Button onClick={handleSubmitServices}>
-                                    Submit
-                                </Button>
-                                <DrawerClose asChild>
-                                    <Button
-                                        variant="outline"
-                                        id="closeDrawerServices"
-                                    >
-                                        Cancel
-                                    </Button>
-                                </DrawerClose>
-                            </DrawerFooter>
-                        </div>
-                    </DrawerContent>
-                </Drawer>
+                <Button onClick={() => setDrawerOpen(true)} variant="default">
+                    + Add Services
+                </Button>
             </div>
-            <DataTableServices data={services} />
+            <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+                <DrawerContent>
+                    <div className="mx-auto w-full max-w-sm">
+                        <DrawerHeader>
+                            <DrawerTitle>
+                                {editServiceId ? "Edit Service" : "Add Service"}
+                            </DrawerTitle>
+                            <DrawerDescription>
+                                {editServiceId
+                                    ? "Edit the service details."
+                                    : "Insert your services in here."}
+                            </DrawerDescription>
+                        </DrawerHeader>
+                        <div className="p-4 pb-0">
+                            <div className="flex flex-col gap-3 items-center justify-center">
+                                <Input
+                                    type="text"
+                                    name="name"
+                                    placeholder="Name"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                />
+                                <Textarea
+                                    placeholder="Type your description here."
+                                    name="description"
+                                    value={description}
+                                    onChange={(e) =>
+                                        setDescription(e.target.value)
+                                    }
+                                />
+                            </div>
+                        </div>
+                        <DrawerFooter>
+                            <Button onClick={handleSubmitServices}>
+                                {editServiceId ? "Save Changes" : "Submit"}
+                            </Button>
+                            <DrawerClose asChild>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setDrawerOpen(false)}
+                                >
+                                    Cancel
+                                </Button>
+                            </DrawerClose>
+                        </DrawerFooter>
+                    </div>
+                </DrawerContent>
+            </Drawer>
+            <DataTableServices
+                data={services}
+                onEdit={handleEditService}
+                onDelete={(id) => {
+                    setDeleteServiceId(id);
+                    setDeleteDialogOpen(true);
+                }}
+            />
+            <AlertDialog
+                open={deleteDialogOpen}
+                onOpenChange={setDeleteDialogOpen}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            Are you absolutely sure?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently
+                            delete this service.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeleteService}>
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     );
 };
