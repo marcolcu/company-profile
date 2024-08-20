@@ -288,6 +288,7 @@ const Services = () => {
 
     return (
         <>
+            <Head title="Adminsite Services" />
             <div className="flex items-center justify-between">
                 <h1 className="scroll-m-20 text-xl font-bold tracking-tight lg:text-3xl">
                     Services
